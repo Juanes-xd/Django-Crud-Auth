@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
 from .forms import TaskForm
+from .models import Task
 # Create your views here.
 
 def home(request):
@@ -31,7 +32,13 @@ def signup(request):
 
 
 def tasks(request):
-    return render(request, 'tasks.html')
+    if request.user.is_authenticated:
+        tasks = Task.objects.filter(user=request.user)
+        return render(request, 'tasks.html', {'tasks': tasks})
+    else:
+        return redirect('signin')
+
+
 
 def create_task(request):
     if request.method == 'GET':
