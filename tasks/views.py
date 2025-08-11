@@ -33,11 +33,27 @@ def signup(request):
 
 def tasks(request):
     if request.user.is_authenticated:
-        tasks = Task.objects.filter(user=request.user)
+        tasks = Task.objects.filter(user=request.user, datecompleted__isnull=True)
         return render(request, 'tasks.html', {'tasks': tasks})
     else:
         return redirect('signin')
 
+
+def task_detail(request, task_id):
+    if request.user.is_authenticated and request.method == 'GET':
+        task = Task.objects.get(id=task_id, user=request.user)
+        form = TaskForm(instance=task)
+        return render(request, 'task_detail.html', {'task': task, 'form': form})
+    elif request.user.is_authenticated and request.method == 'POST':
+        task = Task.objects.get(id=task_id, user=request.user)
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('tasks')
+        else:
+            return render(request, 'task_detail.html', {'task': task, 'form': form})
+    else:
+        return redirect('signin')
 
 
 def create_task(request):
