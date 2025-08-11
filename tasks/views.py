@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
+from .forms import TaskForm
 # Create your views here.
 
 def home(request):
@@ -32,7 +33,21 @@ def signup(request):
 def tasks(request):
     return render(request, 'tasks.html')
 
-
+def create_task(request):
+    if request.method == 'GET':
+        form = TaskForm()
+        return render(request, 'create_task.html', {'form': form})
+    else:
+        try:
+            form = TaskForm(request.POST)
+            new_task = form.save(commit=False)
+            new_task.user = request.user
+            if form.is_valid():
+                new_task.save()
+                return redirect('tasks')
+        except Exception as e:
+            return render(request, 'create_task.html', {'form': form, 'error': str(e)})
+        return render(request, 'create_task.html', {'form': form})
 
 def signout(request):
     logout(request)
