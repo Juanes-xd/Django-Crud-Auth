@@ -21,4 +21,13 @@
     <li>No tasks available.</li>
   {% endfor %}
 </ul>
+
+<form action="{% url 'complete_task' task.id %}" method="POST">
+  {% csrf_token %}
+  <button type="submit">Complete Task</button>
+</form>
+<form action="{% url 'delete_task' task.id %}" method="POST">
+  {% csrf_token %}
+  <button type="submit">Delete Task</button>
+</form>
 {% endblock %}

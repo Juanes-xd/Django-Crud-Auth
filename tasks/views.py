@@ -1,3 +1,4 @@
+from time import timezone
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -52,6 +53,33 @@ def task_detail(request, task_id):
             return redirect('tasks')
         else:
             return render(request, 'task_detail.html', {'task': task, 'form': form})
+    else:
+        return redirect('signin')
+
+
+def complete_task(request, task_id):
+    if request.user.is_authenticated and request.method == 'POST':
+        task = Task.objects.get(id=task_id, user=request.user)
+        task.datecompleted = timezone.now()
+        task.save()
+        return redirect('tasks')
+    else:
+        return redirect('signin')
+
+
+def tasks_completed(request):
+    if request.user.is_authenticated:
+        tasks = Task.objects.filter(user=request.user, datecompleted__isnull=False)
+        return render(request, 'tasks_completed.html', {'tasks': tasks})
+    else:
+        return redirect('signin')
+
+
+def delete_task(request, task_id):
+    if request.user.is_authenticated and request.method == 'POST':
+        task = Task.objects.get(id=task_id, user=request.user)
+        task.delete()
+        return redirect('tasks')
     else:
         return redirect('signin')
 
